@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ntasks"
+description = "A command line task tracker"
+requires-python = ">=3.10"
+dynamic = ["version"]
+
+[project.scripts]
+ntasks = "ntasks.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "ntasks.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
