@@ -38,7 +38,7 @@ class MainTests(unittest.TestCase):
         self.run_cli("-a", "Walk dog")
         self.run_cli("-c", "1")
 
-        self.assertEqual(self.run_cli("-l"), (0, "[x] 1  Buy milk\n[ ] 2  Walk dog\n", ""))
+        self.assertEqual(self.run_cli("-l"), (0, "--- TASK LIST ---\nID: 1 - [x] Buy milk\nID: 2 - [ ] Walk dog\n", ""))
 
     def test_done_prints_task(self):
         self.run_cli("-a", "Buy milk")
@@ -102,7 +102,7 @@ class MainTests(unittest.TestCase):
     def test_long_flags_work(self):
         self.assertEqual(self.run_cli("--add", "Buy milk"), (0, "Added task 1: Buy milk\n", ""))
         self.assertEqual(self.run_cli("--complete", "1"), (0, "Completed task 1: Buy milk\n", ""))
-        self.assertEqual(self.run_cli("--list"), (0, "[x] 1  Buy milk\n", ""))
+        self.assertEqual(self.run_cli("--list"), (0, "--- TASK LIST ---\nID: 1 - [x] Buy milk\n", ""))
         self.assertEqual(self.run_cli("--delete", "1"), (0, "Deleted task 1: Buy milk\n", ""))
 
     def test_two_commands_at_once_exits_with_status_2(self):

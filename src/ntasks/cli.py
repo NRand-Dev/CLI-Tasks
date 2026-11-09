@@ -19,9 +19,11 @@ def cmd_list(args):
     tasks = store.list_tasks()
     if not tasks:
         print("No tasks.")
+        return 0
+    print("--- TASK LIST ---")
     for task in tasks:
         checkbox = "[x]" if task.done else "[ ]"
-        print(f"{checkbox} {task.id}  {task.title}")
+        print(f"ID: {task.id} - {checkbox} {task.title}")
     return 0
 
 

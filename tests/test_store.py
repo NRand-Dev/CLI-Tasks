@@ -82,6 +82,16 @@ class TaskOperationTests(StoreTestCase):
 
         self.assertEqual(task.id, 3)
 
+    def test_ids_restart_at_1_when_list_is_empty(self):
+        store.add_task("Buy milk")
+        store.add_task("Walk dog")
+        store.delete_task(1)
+        store.delete_task(2)
+
+        task = store.add_task("Read")
+
+        self.assertEqual(task.id, 1)
+
     def test_unknown_id_raises_not_found(self):
         store.add_task("Buy milk")
 

@@ -24,6 +24,9 @@ def add_task(title):
         raise StoreError("task title cannot be blank")
 
     next_id, tasks = _load()
+    if not tasks:
+        # IDs are never reused while tasks exist, but an empty list starts over at 1.
+        next_id = 1
     created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     task = Task(id=next_id, title=title, done=False, created_at=created_at)
     tasks.append(task)
