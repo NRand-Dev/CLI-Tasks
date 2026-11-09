@@ -28,31 +28,31 @@ class MainTests(unittest.TestCase):
         return code, stdout.getvalue(), stderr.getvalue()
 
     def test_list_with_no_tasks(self):
-        self.assertEqual(self.run_cli("list"), (0, "No tasks.\n", ""))
+        self.assertEqual(self.run_cli("-l"), (0, "No tasks.\n", ""))
 
     def test_add_prints_new_task(self):
-        self.assertEqual(self.run_cli("add", "Buy milk"), (0, "Added task 1: Buy milk\n", ""))
+        self.assertEqual(self.run_cli("-a", "Buy milk"), (0, "Added task 1: Buy milk\n", ""))
 
     def test_list_shows_status_and_id(self):
-        self.run_cli("add", "Buy milk")
-        self.run_cli("add", "Walk dog")
-        self.run_cli("done", "1")
+        self.run_cli("-a", "Buy milk")
+        self.run_cli("-a", "Walk dog")
+        self.run_cli("-c", "1")
 
-        self.assertEqual(self.run_cli("list"), (0, "[x] 1  Buy milk\n[ ] 2  Walk dog\n", ""))
+        self.assertEqual(self.run_cli("-l"), (0, "[x] 1  Buy milk\n[ ] 2  Walk dog\n", ""))
 
     def test_done_prints_task(self):
-        self.run_cli("add", "Buy milk")
+        self.run_cli("-a", "Buy milk")
 
-        self.assertEqual(self.run_cli("done", "1"), (0, "Completed task 1: Buy milk\n", ""))
+        self.assertEqual(self.run_cli("-c", "1"), (0, "Completed task 1: Buy milk\n", ""))
 
     def test_delete_prints_task(self):
-        self.run_cli("add", "Buy milk")
+        self.run_cli("-a", "Buy milk")
 
-        self.assertEqual(self.run_cli("delete", "1"), (0, "Deleted task 1: Buy milk\n", ""))
-        self.assertEqual(self.run_cli("list"), (0, "No tasks.\n", ""))
+        self.assertEqual(self.run_cli("-d", "1"), (0, "Deleted task 1: Buy milk\n", ""))
+        self.assertEqual(self.run_cli("-l"), (0, "No tasks.\n", ""))
 
     def test_unknown_id_prints_error_and_returns_1(self):
-        for command in ("done", "delete"):
+        for command in ("-c", "-d"):
             with self.subTest(command=command):
                 code, stdout, stderr = self.run_cli(command, "99")
 
@@ -61,7 +61,7 @@ class MainTests(unittest.TestCase):
                 self.assertIn("no task with ID 99", stderr)
 
     def test_blank_title_prints_error_and_returns_1(self):
-        code, stdout, stderr = self.run_cli("add", "   ")
+        code, stdout, stderr = self.run_cli("-a", "   ")
 
         self.assertEqual(code, 1)
         self.assertEqual(stdout, "")
@@ -70,7 +70,7 @@ class MainTests(unittest.TestCase):
     def test_corrupt_file_prints_error_and_returns_1(self):
         self.data_file.write_text("{not json", encoding="utf-8")
 
-        code, stdout, stderr = self.run_cli("list")
+        code, stdout, stderr = self.run_cli("-l")
 
         self.assertEqual(code, 1)
         self.assertEqual(stdout, "")
@@ -79,14 +79,14 @@ class MainTests(unittest.TestCase):
     def test_non_numeric_id_exits_with_status_2(self):
         with contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as caught:
-                main(["done", "abc"])
+                main(["-c", "abc"])
 
         self.assertEqual(caught.exception.code, 2)
 
     def test_version_prints_version(self):
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
-            code = main(["version"])
+            code = main(["-v"])
 
         self.assertEqual(code, 0)
         self.assertEqual(stdout.getvalue().strip(), f"ntasks-v: {__version__}")
@@ -98,6 +98,19 @@ class MainTests(unittest.TestCase):
 
         self.assertEqual(code, 0)
         self.assertIn("usage: ntasks", stdout.getvalue())
+
+    def test_long_flags_work(self):
+        self.assertEqual(self.run_cli("--add", "Buy milk"), (0, "Added task 1: Buy milk\n", ""))
+        self.assertEqual(self.run_cli("--complete", "1"), (0, "Completed task 1: Buy milk\n", ""))
+        self.assertEqual(self.run_cli("--list"), (0, "[x] 1  Buy milk\n", ""))
+        self.assertEqual(self.run_cli("--delete", "1"), (0, "Deleted task 1: Buy milk\n", ""))
+
+    def test_two_commands_at_once_exits_with_status_2(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as caught:
+                main(["-a", "Buy milk", "-l"])
+
+        self.assertEqual(caught.exception.code, 2)
 
     def test_unknown_command_exits_with_status_2(self):
         with contextlib.redirect_stderr(io.StringIO()):
