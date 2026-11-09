@@ -7,6 +7,8 @@ from pathlib import Path
 
 from ntasks.models import Task
 
+## STORE MODULE - Handles saving, updating, deleting tasks from the JSON file.
+
 
 class StoreError(Exception):
     """A task could not be read, saved, or created."""
